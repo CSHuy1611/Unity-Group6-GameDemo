@@ -100,12 +100,11 @@ public class GameManager : MonoBehaviour
         
         activeTrees.Add(tree);
         
-        // TODO: Phase 2
-        // Tree treeScript = tree.GetComponent<Tree>();
-        // if (treeScript != null)
-        // {
-        //     treeScript.Initialize(this);
-        // }
+        Tree treeScript = tree.GetComponent<Tree>();
+        if (treeScript != null)
+        {
+            treeScript.Initialize(this);
+        }
     }
     
     public void OnTreeDestroyed(GameObject tree, Vector3 position)

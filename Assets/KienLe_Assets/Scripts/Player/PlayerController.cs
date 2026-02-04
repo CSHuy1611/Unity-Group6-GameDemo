@@ -172,16 +172,15 @@ public class PlayerController : MonoBehaviour
     
     private void HandleTriggerCollision(Collider other)
     {
-        // TODO: Phase 2
-        // if (other.CompareTag("Tree") && isAttacking)
-        // {
-        //     Debug.Log($"?? Player chopped tree: {other.name}");
-        //     Tree tree = other.GetComponent<Tree>();
-        //     if (tree != null)
-        //     {
-        //         tree.ChopDown();
-        //     }
-        // }
+        if (other.CompareTag("Tree") && isAttacking)
+        {
+            Debug.Log($"?? Player chopped tree: {other.name}");
+            Tree tree = other.GetComponent<Tree>();
+            if (tree != null)
+            {
+                tree.ChopDown();
+            }
+        }
         
         // TODO: Phase 3
         // if (other.CompareTag("Chest"))
