@@ -1,145 +1,233 @@
-using System.Collections;
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
     private Rigidbody2D rb;
-    private Animator animator;
     private GameManager gameManager;
 
     [Header("Movement Settings")]
     [SerializeField] private float moveSpeed = 5f;
     [SerializeField] private float jumpForce = 8f;
 
-    [Header("Ground Check")]
-    [SerializeField] private Transform groundCheckPoint;
-    [SerializeField] private float groundCheckRadius = 0.15f;
-    [SerializeField] private LayerMask groundLayer;
-
-    [Header("Combat")]
-    [SerializeField] private float attackRange = 1.5f;
-    [SerializeField] private LayerMask attackLayers;
-    [SerializeField] private float attackCooldown = 0.3f;
-
+    [Header("State")]
     public PlayerState currentState = PlayerState.Idle;
 
-    private float moveInput;
-    private bool isGrounded;
-    private bool isAttacking;
-    private bool inventoryOpen;
+    [Header("Combat")]
+    [SerializeField] private float attackRange = 2f;
+    [SerializeField] private LayerMask attackLayers;
 
-    private void Awake()
+    [Header("Ground Check")]
+    [SerializeField] private bool isGrounded = true;
+    [SerializeField] private float groundCheckDistance = 0.2f;
+    [SerializeField] private LayerMask groundLayer;
+
+    private bool inventoryOpen = false;
+    private Vector2 moveDirection;
+    private bool isAttacking = false;
+
+    void Start()
     {
-        rb = GetComponent<Rigidbody2D>();
-        animator = GetComponent<Animator>();
-        gameManager = FindObjectOfType<GameManager>();
-
-        rb.freezeRotation = true;
+        InitializeComponents();
     }
 
-    private void Update()
+    void Update()
     {
         if (Input.GetKeyDown(KeyCode.E))
         {
             ToggleInventory();
         }
 
-        if (inventoryOpen) return;
+        if (!inventoryOpen)
+        {
+            HandleMovementInput();
+            HandleJumpInput();
+            HandleAttackInput();
+        }
 
-        ReadInput();
         UpdateState();
-        UpdateAnimation();
+        CheckGroundStatus();
     }
 
-    private void FixedUpdate()
+    void FixedUpdate()
     {
-        if (inventoryOpen) return;
-
-        CheckGround();
-        Move();
+        if (!inventoryOpen)
+        {
+            ApplyMovement();
+        }
     }
 
-    private void ReadInput()
+    void OnTriggerEnter2D(Collider2D other)
     {
-        moveInput = Input.GetAxisRaw("Horizontal");
+        HandleTriggerCollision(other);
+    }
 
-        if (Input.GetKeyDown(KeyCode.Space) && isGrounded && !isAttacking)
+    private void InitializeComponents()
+    {
+        rb = GetComponent<Rigidbody2D>();
+        if (rb == null)
+        {
+            Debug.LogError("PlayerController: Rigidbody component not found!");
+        }
+
+        gameManager = FindObjectOfType<GameManager>();
+        if (gameManager == null)
+        {
+            Debug.LogError("PlayerController: GameManager not found in scene!");
+        }
+
+        currentState = PlayerState.Idle;
+        Debug.Log("PlayerController initialized!");
+    }
+
+    private void HandleMovementInput()
+    {
+        float horizontal = Input.GetAxisRaw("Horizontal");
+        moveDirection = new Vector2(horizontal, 0f).normalized;
+    }
+
+    private void HandleJumpInput()
+    {
+        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
         {
             Jump();
         }
+    }
 
-        if (Input.GetKeyDown(KeyCode.Return) && !isAttacking)
+    private void HandleAttackInput()
+    {
+        if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
         {
-            StartCoroutine(Attack());
+            StartAttack();
         }
     }
 
-    private void Move()
+    private void ApplyMovement()
     {
-        rb.velocity = new Vector2(moveInput * moveSpeed, rb.velocity.y);
-
-        if (moveInput != 0)
+        if (Mathf.Abs(moveDirection.x) > 0.1f)
         {
-            transform.localScale = new Vector3(
-                Mathf.Sign(moveInput),
-                1,
-                1
+            rb.velocity = new Vector2(
+                moveDirection.x * moveSpeed,
+                rb.velocity.y
             );
+        }
+        else
+        {
+            rb.velocity = new Vector2(0f, rb.velocity.y);
         }
     }
 
     private void Jump()
     {
         rb.velocity = new Vector2(rb.velocity.x, jumpForce);
+        currentState = PlayerState.Jump;
     }
 
-    private void CheckGround()
-    {
-        isGrounded = Physics2D.OverlapCircle(
-            groundCheckPoint.position,
-            groundCheckRadius,
-            groundLayer
-        );
-    }
-
-    private IEnumerator Attack()
+    private void StartAttack()
     {
         isAttacking = true;
         currentState = PlayerState.Attack;
+        Debug.Log("?? Player attacking!");
 
-        animator.SetTrigger("Attack");
+        CheckAttackTargets();
 
-        Collider2D[] hits = Physics2D.OverlapCircleAll(
-            transform.position,
-            attackRange,
-            attackLayers
-        );
+        StartCoroutine(ResetAttackState());
+    }
 
-        foreach (Collider2D hit in hits)
+    private void CheckAttackTargets()
+    {
+        Collider2D[] hitColliders = Physics2D.OverlapCircleAll(transform.position, attackRange);
+
+        foreach (var hitCollider in hitColliders)
         {
-            if (hit.CompareTag("Tree"))
+            if (hitCollider.CompareTag("Tree"))
             {
-                hit.GetComponent<Tree>()?.ChopDown();
+                Tree tree = hitCollider.GetComponent<Tree>();
+                if (tree != null)
+                {
+                    Debug.Log($"?? Hit tree: {hitCollider.name}");
+                    tree.ChopDown();
+                }
             }
-            else if (hit.CompareTag("Chest"))
+
+            if (hitCollider.CompareTag("Chest"))
             {
-                hit.GetComponent<Chest>()?.Collect();
+                Chest chest = hitCollider.GetComponent<Chest>();
+                if (chest != null)
+                {
+                    Debug.Log($"?? Hit chest: {hitCollider.name}");
+                    chest.Collect();
+                }
             }
         }
+    }
 
-        yield return new WaitForSeconds(attackCooldown);
+    private IEnumerator ResetAttackState()
+    {
+        yield return new WaitForSeconds(0.3f);
         isAttacking = false;
+        if (currentState == PlayerState.Attack)
+        {
+            currentState = PlayerState.Idle;
+        }
+    }
+
+    public bool IsAttacking()
+    {
+        return isAttacking;
+    }
+
+    private void ToggleInventory()
+    {
+        inventoryOpen = !inventoryOpen;
+
+        if (inventoryOpen)
+        {
+            Debug.Log("=== INVENTORY OPENED ===");
+            rb.velocity = Vector2.zero;
+
+            if (gameManager != null)
+            {
+                gameManager.OpenInventory();
+            }
+        }
+        else
+        {
+            Debug.Log("=== INVENTORY CLOSED ===");
+
+            if (gameManager != null)
+            {
+                gameManager.CloseInventory();
+            }
+        }
+    }
+
+    private void HandleTriggerCollision(Collider2D other)
+    {
+        if (other.CompareTag("Chest"))
+        {
+            Debug.Log("?? Player touched chest!");
+            Chest chest = other.GetComponent<Chest>();
+            if (chest != null)
+            {
+                chest.Collect();
+            }
+        }
     }
 
     private void UpdateState()
     {
-        if (isAttacking) return;
+        if (currentState == PlayerState.Attack)
+        {
+            return;
+        }
 
         if (!isGrounded)
         {
             currentState = PlayerState.Jump;
         }
-        else if (Mathf.Abs(moveInput) > 0.1f)
+        else if (moveDirection.magnitude > 0.1f)
         {
             currentState = PlayerState.Run;
         }
@@ -149,37 +237,24 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void UpdateAnimation()
+    private void CheckGroundStatus()
     {
-        animator.SetBool("isGrounded", isGrounded);
-        animator.SetFloat("Speed", Mathf.Abs(moveInput));
-        animator.SetInteger("State", (int)currentState);
-    }
-
-    private void ToggleInventory()
-    {
-        inventoryOpen = !inventoryOpen;
-
-        if (inventoryOpen)
+        Ray ray = new Ray(transform.position, Vector3.down);
+        isGrounded = Physics2D.Raycast(
+            transform.position,
+            Vector2.down,
+            groundCheckDistance,
+            groundLayer
+        );
+        if (Mathf.Abs(rb.velocity.y) < 0.1f)
         {
-            rb.velocity = Vector2.zero;
-            gameManager?.OpenInventory();
-        }
-        else
-        {
-            gameManager?.CloseInventory();
+            isGrounded = true;
         }
     }
 
-    private void OnDrawGizmosSelected()
+    void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, attackRange);
-
-        if (groundCheckPoint != null)
-        {
-            Gizmos.color = Color.green;
-            Gizmos.DrawWireSphere(groundCheckPoint.position, groundCheckRadius);
-        }
     }
 }
