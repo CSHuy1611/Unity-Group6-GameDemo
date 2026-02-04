@@ -6,26 +6,22 @@ public class PlayerController : MonoBehaviour
 {
     private Rigidbody rb;
     private GameManager gameManager;
-
+    
     [Header("Movement Settings")]
     [SerializeField] private float moveSpeed = 5f;
     [SerializeField] private float jumpForce = 8f;
-
+    
     [Header("State")]
     public PlayerState currentState = PlayerState.Idle;
-
-    [Header("Combat Settings")]
-    [SerializeField] private float attackRange = 5f;
-    [SerializeField] private int attackDamage = 50;
-
+    
     [Header("Ground Check")]
     [SerializeField] private bool isGrounded = true;
     [SerializeField] private float groundCheckDistance = 0.2f;
     [SerializeField] private LayerMask groundLayer;
-
-    private bool inventoryOpen = false;
     
+    private bool inventoryOpen = false;
     private Vector3 moveDirection;
+    private bool isAttacking = false;
     
     void Start()
     {
@@ -101,7 +97,7 @@ public class PlayerController : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
         {
-            Attack();
+            StartAttack();
         }
     }
     
@@ -125,40 +121,28 @@ public class PlayerController : MonoBehaviour
         Debug.Log("Player jumped!");
     }
     
-    private void Attack()
+    private void StartAttack()
     {
+        isAttacking = true;
         currentState = PlayerState.Attack;
-        Debug.Log("Player attacking!");
-        
-        if (gameManager != null)
-        {
-            GameObject nearestEnemy = gameManager.FindNearestEnemy(transform.position, attackRange);
-            
-            if (nearestEnemy != null)
-            {
-                Enemy enemyScript = nearestEnemy.GetComponent<Enemy>();
-                if (enemyScript != null)
-                {
-                    enemyScript.TakeDamage(attackDamage);
-                    Debug.Log($"Hit enemy: {nearestEnemy.name} for {attackDamage} damage!");
-                }
-            }
-            else
-            {
-                Debug.Log("No enemy in range!");
-            }
-        }
+        Debug.Log("?? Player attacking!");
         
         StartCoroutine(ResetAttackState());
     }
     
     private IEnumerator ResetAttackState()
     {
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(0.3f);
+        isAttacking = false;
         if (currentState == PlayerState.Attack)
         {
             currentState = PlayerState.Idle;
         }
+    }
+    
+    public bool IsAttacking()
+    {
+        return isAttacking;
     }
     
     private void ToggleInventory()
@@ -169,6 +153,7 @@ public class PlayerController : MonoBehaviour
         {
             Debug.Log("=== INVENTORY OPENED ===");
             rb.velocity = Vector3.zero;
+            
             if (gameManager != null)
             {
                 gameManager.OpenInventory();
@@ -185,34 +170,29 @@ public class PlayerController : MonoBehaviour
         }
     }
     
-    public bool IsInventoryOpen()
-    {
-        return inventoryOpen;
-    }
-
     private void HandleTriggerCollision(Collider other)
     {
-        // Pickup Chest
-        if (other.CompareTag("Chest"))
-        {
-            Debug.Log("Player collected chest!");
-            Chest chest = other.GetComponent<Chest>();
-            if (chest != null)
-            {
-                chest.Collect();
-            }
-        }
+        // TODO: Phase 2
+        // if (other.CompareTag("Tree") && isAttacking)
+        // {
+        //     Debug.Log($"?? Player chopped tree: {other.name}");
+        //     Tree tree = other.GetComponent<Tree>();
+        //     if (tree != null)
+        //     {
+        //         tree.ChopDown();
+        //     }
+        // }
         
-        // Pickup Treasure
-        if (other.CompareTag("Treasure"))
-        {
-            Debug.Log("Player picked up treasure!");
-            Treasure treasure = other.GetComponent<Treasure>();
-            if (treasure != null)
-            {
-                treasure.Pickup();
-            }
-        }
+        // TODO: Phase 3
+        // if (other.CompareTag("Chest"))
+        // {
+        //     Debug.Log("?? Player collected chest!");
+        //     Chest chest = other.GetComponent<Chest>();
+        //     if (chest != null)
+        //     {
+        //         chest.Collect();
+        //     }
+        // }
     }
     
     private void UpdateState()
@@ -247,26 +227,8 @@ public class PlayerController : MonoBehaviour
         }
     }
     
-    public void TakeDamage(int damage)
-    {
-        Debug.Log($"Player took {damage} damage!");
-    }
-    
-    public void Die()
-    {
-        currentState = PlayerState.Die;
-        Debug.Log("Player died!");
-    }
-    
-    // =============================================
-    // DEBUG
-    // =============================================
-    
     void OnDrawGizmos()
     {
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, attackRange);
-        
         Gizmos.color = Color.green;
         Gizmos.DrawRay(transform.position, Vector3.down * (groundCheckDistance + 0.1f));
     }

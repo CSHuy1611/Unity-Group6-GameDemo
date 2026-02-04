@@ -1,12 +1,30 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+
 public class GameManager : MonoBehaviour
 {
     [Header("=== MANAGERS ===")]
     public InventoryManager inventoryManager;
     public TreasureManager treasureManager;
-    public WaveManager waveManager;
+
+    [Header("=== RESOURCE SYSTEM ===")]
+    public GameObject treePrefab;
+    public List<GameObject> activeTrees = new List<GameObject>();
+    [SerializeField] private int maxTrees = 5;
+    [SerializeField] private float treeSpawnRadius = 15f;
+    
+    [Header("=== COLLECTIBLES ===")]
+    public GameObject coinPrefab;
+    public List<GameObject> activeCoins = new List<GameObject>();
+    [SerializeField] private int fixedCoins = 10;
+    [SerializeField] private float coinSpawnRadius = 20f;
+    
+    private GameObject treesParent;
+    private GameObject coinsParent;
+    
+    [Header("=== SCORE ===")]
+    public int score = 0;
     
     void Start()
     {
@@ -20,13 +38,10 @@ public class GameManager : MonoBehaviour
     
     private void InitializeGame()
     {
-        Debug.Log("?????????????????????????????????????????????");
-        Debug.Log("?      GAME MANAGER INITIALIZATION          ?");
-        Debug.Log("?????????????????????????????????????????????");
         SetupManagers();
         InitializeManagers();
-      
-        Debug.Log("? Game initialized successfully!");
+        SpawnTrees();
+        SpawnCoins();
         LogAllLists();
     }
     
@@ -46,12 +61,8 @@ public class GameManager : MonoBehaviour
             treasureManager = treasureObj.AddComponent<TreasureManager>();
         }
         
-        if (waveManager == null)
-        {
-            GameObject waveObj = new GameObject("WaveManager");
-            waveObj.transform.SetParent(transform);
-            waveManager = waveObj.AddComponent<WaveManager>();
-        }
+        treesParent = new GameObject("=== TREES ===");
+        coinsParent = new GameObject("=== COINS ===");
     }
     
     private void InitializeManagers()
@@ -62,15 +73,100 @@ public class GameManager : MonoBehaviour
             Debug.Log("? TreasureManager initialized");
         }
         
-        if (waveManager != null)
-        {
-            waveManager.Initialize();
-            Debug.Log("? WaveManager initialized");
-        }
-        
         Debug.Log("? InventoryManager initialized");
     }
     
+    // =============================================
+    // TREE SYSTEM
+    // =============================================
+    
+    private void SpawnTrees()
+    {
+        for (int i = 0; i < maxTrees; i++)
+        {
+            SpawnTree();
+        }
+        
+        Debug.Log($"? Spawned {activeTrees.Count} trees");
+    }
+    
+    private void SpawnTree()
+    {
+        Vector3 randomPos = GetRandomPositionInRadius(Vector3.zero, treeSpawnRadius);
+        randomPos.y = 0.5f;
+        
+        GameObject tree = Instantiate(treePrefab, randomPos, Quaternion.identity, treesParent.transform);
+        tree.name = $"Tree_{activeTrees.Count + 1}";
+        
+        activeTrees.Add(tree);
+        
+        // TODO: Phase 2
+        // Tree treeScript = tree.GetComponent<Tree>();
+        // if (treeScript != null)
+        // {
+        //     treeScript.Initialize(this);
+        // }
+    }
+    
+    public void OnTreeDestroyed(GameObject tree, Vector3 position)
+    {
+        if (activeTrees.Contains(tree))
+        {
+            activeTrees.Remove(tree);
+            Debug.Log($"?? Tree chopped! Remaining trees: {activeTrees.Count}");
+            
+            Destroy(tree, 0.3f);
+            
+            SpawnTree();
+        }
+    }
+    
+    // =============================================
+    // COIN SYSTEM
+    // =============================================
+    
+    private void SpawnCoins()
+    {
+        for (int i = 0; i < fixedCoins; i++)
+        {
+            Vector3 randomPos = GetRandomPositionInRadius(Vector3.zero, coinSpawnRadius);
+            randomPos.y = 0.3f;
+            
+            GameObject coin = Instantiate(coinPrefab, randomPos, Quaternion.identity, coinsParent.transform);
+            coin.name = $"Coin_{i + 1}";
+            
+            activeCoins.Add(coin);
+        }
+        
+        Debug.Log($"? Spawned {activeCoins.Count} coins");
+    }
+    
+    public void OnCoinCollected(GameObject coin)
+    {
+        if (activeCoins.Contains(coin))
+        {
+            activeCoins.Remove(coin);
+            Debug.Log($"?? Coin collected! Remaining coins: {activeCoins.Count}");
+        }
+    }
+    
+    // =============================================
+    // ITEM COLLECTION & SCORE
+    // =============================================
+    
+    public void OnItemCollected(Item item)
+    {
+        if (inventoryManager != null)
+        {
+            inventoryManager.AddItemStackable(item, item.quantity);
+        }
+        
+        int points = item.value * item.quantity;
+        score += points;
+        
+        Debug.Log($"? Collected {item.itemName} x{item.quantity} (+{points} points) | Total Score: {score}");
+    }
+
     public void OpenInventory()
     {
         if (inventoryManager != null)
@@ -87,28 +183,17 @@ public class GameManager : MonoBehaviour
         }
     }
     
-    public GameObject FindNearestEnemy(Vector3 position, float range)
-    {
-        if (waveManager != null)
-        {
-            return waveManager.FindNearestEnemy(position, range);
-        }
-        return null;
-    }
-    
     // =============================================
     // DEBUG INPUT
     // =============================================
     
     private void HandleDebugInput()
     {
-        // F1 - Log all lists
         if (Input.GetKeyDown(KeyCode.F1))
         {
             LogAllLists();
         }
         
-        // F2 - Log inventory details
         if (Input.GetKeyDown(KeyCode.F2))
         {
             if (inventoryManager != null)
@@ -117,16 +202,11 @@ public class GameManager : MonoBehaviour
             }
         }
         
-        // F3 - Log enemies details
         if (Input.GetKeyDown(KeyCode.F3))
         {
-            if (waveManager != null)
-            {
-                waveManager.LogEnemies();
-            }
+            Debug.Log($"?? Current Score: {score}");
         }
         
-        // F5 - Clear inventory
         if (Input.GetKeyDown(KeyCode.F5))
         {
             if (inventoryManager != null)
@@ -135,21 +215,11 @@ public class GameManager : MonoBehaviour
             }
         }
         
-        // F6 - Sort inventory
         if (Input.GetKeyDown(KeyCode.F6))
         {
             if (inventoryManager != null)
             {
                 inventoryManager.SortInventory();
-            }
-        }
-        
-        // F7 - Kill all enemies
-        if (Input.GetKeyDown(KeyCode.F7))
-        {
-            if (waveManager != null)
-            {
-                waveManager.KillAllEnemies();
             }
         }
     }
@@ -162,7 +232,8 @@ public class GameManager : MonoBehaviour
         
         if (inventoryManager != null)
         {
-            Debug.Log($"?? Inventory Items: {inventoryManager.GetItemCount()}");
+            int totalValue = inventoryManager.GetTotalValue();
+            Debug.Log($"?? Inventory Items: {inventoryManager.GetItemCount()} (Value: {totalValue})");
         }
         
         if (treasureManager != null)
@@ -170,45 +241,41 @@ public class GameManager : MonoBehaviour
             Debug.Log($"?? Active Treasures: {treasureManager.GetTreasureCount()}");
         }
         
-        if (waveManager != null)
-        {
-            Debug.Log($"?? Active Enemies: {waveManager.GetEnemyCount()}");
-            Debug.Log($"?? Current Wave: {waveManager.GetCurrentWave()}/{waveManager.GetTotalWaves()}");
-        }
+        Debug.Log($"?? Active Trees: {activeTrees.Count}");
+        Debug.Log($"?? Active Coins: {activeCoins.Count}");
+        Debug.Log($"?? Score: {score}");
         
         Debug.Log("???????????????????????????????????????????\n");
     }
+    
+    // =============================================
+    // UTILITIES
+    // =============================================
+    
+    private Vector3 GetRandomPositionInRadius(Vector3 center, float radius)
+    {
+        Vector2 randomCircle = Random.insideUnitCircle * radius;
+        return center + new Vector3(randomCircle.x, 0f, randomCircle.y);
+    }
 }
 
+// =============================================
+// DATA CLASSES - Shared by all managers
+// =============================================
 
 [System.Serializable]
 public class Item
 {
     public int id;
     public string itemName;
-    public string description;
     public int value;
+    public int quantity;
     
-    public Item(int id, string name, string desc, int val)
+    public Item(int id, string name, int val, int qty = 1)
     {
         this.id = id;
         this.itemName = name;
-        this.description = desc;
         this.value = val;
+        this.quantity = qty;
     }
-}
-
-[System.Serializable]
-public class WaveData
-{
-    public int waveNumber;
-    public List<EnemySpawnInfo> enemySpawns = new List<EnemySpawnInfo>();
-}
-
-
-[System.Serializable]
-public class EnemySpawnInfo
-{
-    public string enemyType;
-    public Vector3 spawnPosition;
 }

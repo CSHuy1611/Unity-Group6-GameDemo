@@ -13,7 +13,24 @@ public class InventoryManager : MonoBehaviour
     public void AddItem(Item item)
     {
         inventory.Add(item);
-        Debug.Log($"✅ Added '{item.itemName}' to inventory. Total items: {inventory.Count}");
+        Debug.Log($"✅ Added '{item.itemName}' x{item.quantity} to inventory. Total items: {inventory.Count}");
+    }
+    
+    public void AddItemStackable(Item newItem, int quantity = 1)
+    {
+        Item existingItem = inventory.Find(item => item.id == newItem.id);
+        
+        if (existingItem != null)
+        {
+            existingItem.quantity += quantity;
+            Debug.Log($"✅ Stacked '{newItem.itemName}' +{quantity}. Now: x{existingItem.quantity}");
+        }
+        else
+        {
+            newItem.quantity = quantity;
+            inventory.Add(newItem);
+            Debug.Log($"✅ Added new '{newItem.itemName}' x{quantity} to inventory");
+        }
     }
     
     public void RemoveItem(int index)
@@ -21,8 +38,17 @@ public class InventoryManager : MonoBehaviour
         if (index >= 0 && index < inventory.Count)
         {
             Item removedItem = inventory[index];
-            inventory.RemoveAt(index);
-            Debug.Log($"❌ Removed '{removedItem.itemName}' from inventory. Remaining: {inventory.Count}");
+            
+            if (removedItem.quantity > 1)
+            {
+                removedItem.quantity--;
+                Debug.Log($"🔽 Decreased '{removedItem.itemName}' quantity. Now: x{removedItem.quantity}");
+            }
+            else
+            {
+                inventory.RemoveAt(index);
+                Debug.Log($"❌ Removed '{removedItem.itemName}' from inventory. Remaining: {inventory.Count}");
+            }
         }
         else
         {
@@ -57,6 +83,16 @@ public class InventoryManager : MonoBehaviour
     public int GetItemCount()
     {
         return inventory.Count;
+    }
+    
+    public int GetTotalValue()
+    {
+        int total = 0;
+        foreach (Item item in inventory)
+        {
+            total += item.value * item.quantity;
+        }
+        return total;
     }
     
     // =============================================
@@ -96,11 +132,13 @@ public class InventoryManager : MonoBehaviour
             {
                 string cursor = (i == selectedInventoryIndex) ? ">>>" : "   ";
                 Item item = inventory[i];
-                Debug.Log($"{cursor} [{i}] {item.itemName} (Value: {item.value})");
+                int totalValue = item.value * item.quantity;
+                Debug.Log($"{cursor} [{i}] {item.itemName} x{item.quantity} (Value: {totalValue})");
             }
         }
         
         Debug.Log($"\nTotal items: {inventory.Count}");
+        Debug.Log($"Total value: {GetTotalValue()}");
         Debug.Log("Controls: W/S = Navigate, R = Remove, E = Close\n");
     }
     

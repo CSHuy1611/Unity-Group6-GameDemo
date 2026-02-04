@@ -48,12 +48,13 @@ public class TreasureManager : MonoBehaviour
             
             GameObject chest = Instantiate(chestPrefab, randomPos, Quaternion.identity, chestsParent.transform);
             chest.name = $"Chest_{i + 1}";
-            
-            Chest chestScript = chest.GetComponent<Chest>();
-            if (chestScript != null)
-            {
-                chestScript.Initialize(this);
-            }
+
+            // TODO: Phase 3
+            // Chest chestScript = chest.GetComponent<Chest>();
+            // if (chestScript != null)
+            // {
+            //     chestScript.Initialize(this);
+            // }
         }
         
         Debug.Log($"✅ Spawned {numberOfChests} chests");
@@ -81,11 +82,12 @@ public class TreasureManager : MonoBehaviour
             
             activeTreasures.Add(treasure);
             
-            Treasure treasureScript = treasure.GetComponent<Treasure>();
-            if (treasureScript != null)
-            {
-                treasureScript.Initialize(this);
-            }
+            // TODO: Phase 2/3
+            // Treasure treasureScript = treasure.GetComponent<Treasure>();
+            // if (treasureScript != null)
+            // {
+            //     treasureScript.Initialize(this);
+            // }
         }
         
         Debug.Log($"✅ Spawned {count} treasures. Total treasures: {activeTreasures.Count}");
@@ -159,16 +161,15 @@ public class TreasureManager : MonoBehaviour
     
     private Item GenerateRandomItem()
     {
-        string[] itemNames = { "Gold Coin", "Silver Coin", "Diamond", "Ruby", "Emerald" };
-        int[] itemValues = { 10, 20, 50, 30, 40 };
+        int randomType = Random.Range(0, 2);
         
-        int randomIndex = Random.Range(0, itemNames.Length);
-        
-        return new Item(
-            Random.Range(1, 1000),
-            itemNames[randomIndex],
-            $"A precious {itemNames[randomIndex]}",
-            itemValues[randomIndex]
-        );
+        if (randomType == 0)
+        {
+            return new Item(2, "Diamond", 10, 1);
+        }
+        else
+        {
+            return new Item(3, "Coin", 5, 1);
+        }
     }
 }
