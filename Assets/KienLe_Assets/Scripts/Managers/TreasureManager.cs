@@ -102,7 +102,7 @@ public class TreasureManager : MonoBehaviour
             Item randomItem = GenerateRandomItem();
             if (inventoryManager != null)
             {
-                inventoryManager.AddItem(randomItem);
+                inventoryManager.AddItemStackable(randomItem, randomItem.quantity);
             }
             
             Destroy(treasure);
