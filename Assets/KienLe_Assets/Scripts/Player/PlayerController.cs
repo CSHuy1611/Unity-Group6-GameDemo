@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    private Rigidbody rb;
+    private Rigidbody2D rb;
     private GameManager gameManager;
     
     [Header("Movement Settings")]
@@ -20,7 +20,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private LayerMask groundLayer;
     
     private bool inventoryOpen = false;
-    private Vector3 moveDirection;
+    private Vector2 moveDirection;
     private bool isAttacking = false;
     
     void Start()
@@ -53,15 +53,15 @@ public class PlayerController : MonoBehaviour
             ApplyMovement();
         }
     }
-    
-    void OnTriggerEnter(Collider other)
+
+    void OnTriggerEnter2D(Collider2D other)
     {
         HandleTriggerCollision(other);
     }
     
     private void InitializeComponents()
     {
-        rb = GetComponent<Rigidbody>();
+        rb = GetComponent<Rigidbody2D>();
         if (rb == null)
         {
             Debug.LogError("PlayerController: Rigidbody component not found!");
@@ -80,9 +80,7 @@ public class PlayerController : MonoBehaviour
     private void HandleMovementInput()
     {
         float horizontal = Input.GetAxisRaw("Horizontal");
-        float vertical = Input.GetAxisRaw("Vertical");
-        
-        moveDirection = new Vector3(horizontal, 0f, vertical).normalized;
+        moveDirection = new Vector2(horizontal, 0f).normalized;
     }
     
     private void HandleJumpInput()
@@ -100,27 +98,28 @@ public class PlayerController : MonoBehaviour
             StartAttack();
         }
     }
-    
+
     private void ApplyMovement()
     {
-        if (moveDirection.magnitude > 0.1f)
+        if (Mathf.Abs(moveDirection.x) > 0.1f)
         {
-            Vector3 movement = moveDirection * moveSpeed;
-            rb.velocity = new Vector3(movement.x, rb.velocity.y, movement.z);
+            rb.velocity = new Vector2(
+                moveDirection.x * moveSpeed,
+                rb.velocity.y
+            );
         }
         else
         {
-            rb.velocity = new Vector3(0f, rb.velocity.y, 0f);
+            rb.velocity = new Vector2(0f, rb.velocity.y);
         }
     }
-    
+
     private void Jump()
     {
-        rb.velocity = new Vector3(rb.velocity.x, jumpForce, rb.velocity.z);
+        rb.velocity = new Vector2(rb.velocity.x, jumpForce);
         currentState = PlayerState.Jump;
-        Debug.Log("Player jumped!");
     }
-    
+
     private void StartAttack()
     {
         isAttacking = true;
@@ -152,8 +151,8 @@ public class PlayerController : MonoBehaviour
         if (inventoryOpen)
         {
             Debug.Log("=== INVENTORY OPENED ===");
-            rb.velocity = Vector3.zero;
-            
+            rb.velocity = Vector2.zero;
+
             if (gameManager != null)
             {
                 gameManager.OpenInventory();
@@ -170,7 +169,7 @@ public class PlayerController : MonoBehaviour
         }
     }
     
-    private void HandleTriggerCollision(Collider other)
+    private void HandleTriggerCollision(Collider2D other)
     {
         if (other.CompareTag("Tree") && isAttacking)
         {
@@ -217,8 +216,12 @@ public class PlayerController : MonoBehaviour
     private void CheckGroundStatus()
     {
         Ray ray = new Ray(transform.position, Vector3.down);
-        isGrounded = Physics.Raycast(ray, groundCheckDistance + 0.1f, groundLayer);
-        
+        isGrounded = Physics2D.Raycast(
+            transform.position,
+            Vector2.down,
+            groundCheckDistance,
+            groundLayer
+        );
         if (Mathf.Abs(rb.velocity.y) < 0.1f)
         {
             isGrounded = true;

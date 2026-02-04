@@ -76,10 +76,7 @@ public class GameManager : MonoBehaviour
         Debug.Log("? InventoryManager initialized");
     }
     
-    // =============================================
     // TREE SYSTEM
-    // =============================================
-    
     private void SpawnTrees()
     {
         for (int i = 0; i < maxTrees; i++)
@@ -120,10 +117,7 @@ public class GameManager : MonoBehaviour
         }
     }
     
-    // =============================================
     // COIN SYSTEM
-    // =============================================
-    
     private void SpawnCoins()
     {
         for (int i = 0; i < fixedCoins; i++)
@@ -149,10 +143,7 @@ public class GameManager : MonoBehaviour
         }
     }
     
-    // =============================================
     // ITEM COLLECTION & SCORE
-    // =============================================
-    
     public void OnItemCollected(Item item)
     {
         if (inventoryManager != null)
@@ -182,10 +173,7 @@ public class GameManager : MonoBehaviour
         }
     }
     
-    // =============================================
     // DEBUG INPUT
-    // =============================================
-    
     private void HandleDebugInput()
     {
         if (Input.GetKeyDown(KeyCode.F1))
@@ -247,10 +235,7 @@ public class GameManager : MonoBehaviour
         Debug.Log("???????????????????????????????????????????\n");
     }
     
-    // =============================================
     // UTILITIES
-    // =============================================
-    
     private Vector3 GetRandomPositionInRadius(Vector3 center, float radius)
     {
         Vector2 randomCircle = Random.insideUnitCircle * radius;
@@ -258,10 +243,7 @@ public class GameManager : MonoBehaviour
     }
 }
 
-// =============================================
 // DATA CLASSES - Shared by all managers
-// =============================================
-
 [System.Serializable]
 public class Item
 {

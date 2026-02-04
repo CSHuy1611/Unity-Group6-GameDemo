@@ -95,10 +95,7 @@ public class InventoryManager : MonoBehaviour
         return total;
     }
     
-    // =============================================
     // UI METHODS
-    // =============================================
-    
     public void OpenInventory()
     {
         inventoryOpen = true;
@@ -141,11 +138,8 @@ public class InventoryManager : MonoBehaviour
         Debug.Log($"Total value: {GetTotalValue()}");
         Debug.Log("Controls: W/S = Navigate, R = Remove, E = Close\n");
     }
-    
-    // =============================================
+
     // NAVIGATION
-    // =============================================
-    
     void Update()
     {
         HandleInventoryNavigation();

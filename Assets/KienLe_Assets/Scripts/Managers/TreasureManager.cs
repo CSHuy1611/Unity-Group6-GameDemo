@@ -34,11 +34,8 @@ public class TreasureManager : MonoBehaviour
         chestsParent = new GameObject("=== CHESTS ===");
         treasuresParent = new GameObject("=== TREASURES ===");
     }
-    
-    // =============================================
-    // CHEST SYSTEM
-    // =============================================
-    
+
+    // CHEST SYSTEM 
     private void SpawnChests()
     {
         for (int i = 0; i < numberOfChests; i++)
@@ -65,10 +62,7 @@ public class TreasureManager : MonoBehaviour
         SpawnTreasuresAroundPosition(chestPosition, treasuresPerChest);
     }
     
-    // =============================================
     // TREASURE SYSTEM
-    // =============================================
-
     private void SpawnTreasuresAroundPosition(Vector3 center, int count)
     {
         for (int i = 0; i < count; i++)
@@ -80,13 +74,6 @@ public class TreasureManager : MonoBehaviour
             treasure.name = $"Treasure_{activeTreasures.Count + 1}";
             
             activeTreasures.Add(treasure);
-            
-            // TODO: Phase 2/3
-            // Treasure treasureScript = treasure.GetComponent<Treasure>();
-            // if (treasureScript != null)
-            // {
-            //     treasureScript.Initialize(this);
-            // }
         }
         
         Debug.Log($"✅ Spawned {count} treasures. Total treasures: {activeTreasures.Count}");
@@ -109,10 +96,7 @@ public class TreasureManager : MonoBehaviour
         }
     }
     
-    // =============================================
     // UTILITIES
-    // =============================================
-
     public GameObject FindNearestTreasure(Vector3 position, float maxRange)
     {
         if (activeTreasures.Count == 0) return null;
