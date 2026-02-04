@@ -4,10 +4,10 @@ using UnityEngine;
 
 public class InventoryManager : MonoBehaviour
 {
-    [Header("=== INVENTORY LIST ===")]
+    [Header("INVENTORY LIST")]
     public List<Item> inventory = new List<Item>();
     
-    [Header("=== UI ===")]
+    [Header("UI")]
     public InventoryUI inventoryUI;
     
     private bool inventoryOpen = false;
@@ -16,7 +16,7 @@ public class InventoryManager : MonoBehaviour
     public void AddItem(Item item)
     {
         inventory.Add(item);
-        Debug.Log($"✅ Added '{item.itemName}' x{item.quantity} to inventory. Total items: {inventory.Count}");
+        Debug.Log($"Added '{item.itemName}' x{item.quantity} to inventory. Total items: {inventory.Count}");
     }
     
     public void AddItemStackable(Item newItem, int quantity = 1)
@@ -26,13 +26,13 @@ public class InventoryManager : MonoBehaviour
         if (existingItem != null)
         {
             existingItem.quantity += quantity;
-            Debug.Log($"✅ Stacked '{newItem.itemName}' +{quantity}. Now: x{existingItem.quantity}");
+            Debug.Log($"Stacked '{newItem.itemName}' +{quantity}. Now: x{existingItem.quantity}");
         }
         else
         {
             newItem.quantity = quantity;
             inventory.Add(newItem);
-            Debug.Log($"✅ Added new '{newItem.itemName}' x{quantity} to inventory");
+            Debug.Log($"Added new '{newItem.itemName}' x{quantity} to inventory");
         }
         
         if (inventoryUI != null && inventoryOpen)
@@ -50,12 +50,12 @@ public class InventoryManager : MonoBehaviour
             if (removedItem.quantity > 1)
             {
                 removedItem.quantity--;
-                Debug.Log($"🔽 Decreased '{removedItem.itemName}' quantity. Now: x{removedItem.quantity}");
+                Debug.Log($"Decreased '{removedItem.itemName}' quantity. Now: x{removedItem.quantity}");
             }
             else
             {
                 inventory.RemoveAt(index);
-                Debug.Log($"❌ Removed '{removedItem.itemName}' from inventory. Remaining: {inventory.Count}");
+                Debug.Log($"Removed '{removedItem.itemName}' from inventory. Remaining: {inventory.Count}");
             }
         }
         else
@@ -74,7 +74,7 @@ public class InventoryManager : MonoBehaviour
     public void SortInventory()
     {
         inventory.Sort((a, b) => b.value.CompareTo(a.value));
-        Debug.Log("📊 Inventory sorted by value (descending)");
+        Debug.Log("Inventory sorted by value (descending)");
         DisplayInventory();
     }
     public Item FindItemByName(string itemName)
@@ -136,10 +136,6 @@ public class InventoryManager : MonoBehaviour
     
     public void DisplayInventory()
     {
-        Debug.Log("\n╔════════════════════════════════════╗");
-        Debug.Log("║         INVENTORY                  ║");
-        Debug.Log("╚════════════════════════════════════╝");
-        
         if (inventory.Count == 0)
         {
             Debug.Log("  (Empty)");
