@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -40,7 +40,15 @@ public class CollectibleItem : MonoBehaviour
             Collect();
         }
     }
-    
+
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Player") && !isCollected)
+        {
+            Collect();
+        }
+    }
+
     private void Collect()
     {
         isCollected = true;
