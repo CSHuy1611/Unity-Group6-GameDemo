@@ -182,16 +182,15 @@ public class PlayerController : MonoBehaviour
             }
         }
         
-        // TODO: Phase 3
-        // if (other.CompareTag("Chest"))
-        // {
-        //     Debug.Log("?? Player collected chest!");
-        //     Chest chest = other.GetComponent<Chest>();
-        //     if (chest != null)
-        //     {
-        //         chest.Collect();
-        //     }
-        // }
+        if (other.CompareTag("Chest"))
+        {
+            Debug.Log("?? Player collected chest!");
+            Chest chest = other.GetComponent<Chest>();
+            if (chest != null)
+            {
+                chest.Collect();
+            }
+        }
     }
     
     private void UpdateState()

@@ -49,12 +49,11 @@ public class TreasureManager : MonoBehaviour
             GameObject chest = Instantiate(chestPrefab, randomPos, Quaternion.identity, chestsParent.transform);
             chest.name = $"Chest_{i + 1}";
 
-            // TODO: Phase 3
-            // Chest chestScript = chest.GetComponent<Chest>();
-            // if (chestScript != null)
-            // {
-            //     chestScript.Initialize(this);
-            // }
+            Chest chestScript = chest.GetComponent<Chest>();
+            if (chestScript != null)
+            {
+                chestScript.Initialize(this);
+            }
         }
         
         Debug.Log($"✅ Spawned {numberOfChests} chests");
@@ -151,6 +150,12 @@ public class TreasureManager : MonoBehaviour
     public int GetTreasureCount()
     {
         return activeTreasures.Count;
+    }
+    
+    public void OnTreasureSpawned(GameObject treasure)
+    {
+        activeTreasures.Add(treasure);
+        Debug.Log($"💎 Treasure spawned from chest. Total: {activeTreasures.Count}");
     }
     
     private Vector3 GetRandomPositionInRadius(Vector3 center, float radius)
