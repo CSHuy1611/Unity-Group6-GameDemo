@@ -7,6 +7,9 @@ public class InventoryManager : MonoBehaviour
     [Header("=== INVENTORY LIST ===")]
     public List<Item> inventory = new List<Item>();
     
+    [Header("=== UI ===")]
+    public InventoryUI inventoryUI;
+    
     private bool inventoryOpen = false;
     private int selectedInventoryIndex = 0;
 
@@ -30,6 +33,11 @@ public class InventoryManager : MonoBehaviour
             newItem.quantity = quantity;
             inventory.Add(newItem);
             Debug.Log($"✅ Added new '{newItem.itemName}' x{quantity} to inventory");
+        }
+        
+        if (inventoryUI != null && inventoryOpen)
+        {
+            inventoryUI.UpdateDisplay();
         }
     }
     
@@ -100,12 +108,25 @@ public class InventoryManager : MonoBehaviour
     {
         inventoryOpen = true;
         selectedInventoryIndex = 0;
-        DisplayInventory();
+        
+        if (inventoryUI != null)
+        {
+            inventoryUI.ShowInventory();
+        }
+        else
+        {
+            DisplayInventory();
+        }
     }
     
     public void CloseInventory()
     {
         inventoryOpen = false;
+        
+        if (inventoryUI != null)
+        {
+            inventoryUI.HideInventory();
+        }
     }
     
     public bool IsInventoryOpen()

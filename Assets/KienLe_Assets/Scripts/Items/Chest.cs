@@ -49,10 +49,19 @@ public class Chest : MonoBehaviour
             }
             
             Vector3 spawnPos = transform.position + Random.insideUnitSphere * spawnRadius;
-            spawnPos.y = 0.3f;
+            spawnPos.y = transform.position.y + 3f;
             
             GameObject treasure = Instantiate(prefabToSpawn, spawnPos, Quaternion.identity);
             treasure.name = $"{(isDiamond ? "Diamond" : "Coin")}_{i + 1}";
+            
+            Rigidbody rb = treasure.GetComponent<Rigidbody>();
+            if (rb == null)
+            {
+                rb = treasure.AddComponent<Rigidbody>();
+            }
+            rb.useGravity = true;
+            rb.mass = 0.5f;
+            rb.drag = 0.5f;
             
             if (treasureManager != null)
             {
@@ -60,6 +69,6 @@ public class Chest : MonoBehaviour
             }
         }
         
-        Debug.Log($"? Spawned {treasureCount} treasures from chest");
+        Debug.Log($"? Spawned {treasureCount} treasures (falling from sky)");
     }
 }

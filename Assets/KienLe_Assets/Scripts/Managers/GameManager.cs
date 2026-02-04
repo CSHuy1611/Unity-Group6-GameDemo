@@ -26,6 +26,9 @@ public class GameManager : MonoBehaviour
     [Header("SCORE")]
     public int score = 0;
     
+    [Header("UI")]
+    public UIManager uiManager;
+    
     void Start()
     {
         InitializeGame();
@@ -42,6 +45,7 @@ public class GameManager : MonoBehaviour
         InitializeManagers();
         SpawnTrees();
         SpawnCoins();
+        UpdateScoreUI();
         LogAllLists();
     }
     
@@ -164,7 +168,17 @@ public class GameManager : MonoBehaviour
         int points = item.value * item.quantity;
         score += points;
         
+        UpdateScoreUI();
+        
         Debug.Log($"? Collected {item.itemName} x{item.quantity} (+{points} points) | Total Score: {score}");
+    }
+    
+    private void UpdateScoreUI()
+    {
+        if (uiManager != null)
+        {
+            uiManager.UpdateScore(score);
+        }
     }
 
     public void OpenInventory()

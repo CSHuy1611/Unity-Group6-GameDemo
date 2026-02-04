@@ -14,6 +14,10 @@ public class PlayerController : MonoBehaviour
     [Header("State")]
     public PlayerState currentState = PlayerState.Idle;
     
+    [Header("Combat")]
+    [SerializeField] private float attackRange = 2f;
+    [SerializeField] private LayerMask attackLayers;
+    
     [Header("Ground Check")]
     [SerializeField] private bool isGrounded = true;
     [SerializeField] private float groundCheckDistance = 0.2f;
@@ -126,7 +130,37 @@ public class PlayerController : MonoBehaviour
         currentState = PlayerState.Attack;
         Debug.Log("?? Player attacking!");
         
+        CheckAttackTargets();
+        
         StartCoroutine(ResetAttackState());
+    }
+    
+    private void CheckAttackTargets()
+    {
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, attackRange);
+        
+        foreach (var hitCollider in hitColliders)
+        {
+            if (hitCollider.CompareTag("Tree"))
+            {
+                Tree tree = hitCollider.GetComponent<Tree>();
+                if (tree != null)
+                {
+                    Debug.Log($"?? Hit tree: {hitCollider.name}");
+                    tree.ChopDown();
+                }
+            }
+            
+            if (hitCollider.CompareTag("Chest"))
+            {
+                Chest chest = hitCollider.GetComponent<Chest>();
+                if (chest != null)
+                {
+                    Debug.Log($"?? Hit chest: {hitCollider.name}");
+                    chest.Collect();
+                }
+            }
+        }
     }
     
     private IEnumerator ResetAttackState()
@@ -171,19 +205,9 @@ public class PlayerController : MonoBehaviour
     
     private void HandleTriggerCollision(Collider2D other)
     {
-        if (other.CompareTag("Tree") && isAttacking)
-        {
-            Debug.Log($"?? Player chopped tree: {other.name}");
-            Tree tree = other.GetComponent<Tree>();
-            if (tree != null)
-            {
-                tree.ChopDown();
-            }
-        }
-        
         if (other.CompareTag("Chest"))
         {
-            Debug.Log("?? Player collected chest!");
+            Debug.Log("?? Player touched chest!");
             Chest chest = other.GetComponent<Chest>();
             if (chest != null)
             {
@@ -228,9 +252,10 @@ public class PlayerController : MonoBehaviour
         }
     }
     
-    void OnDrawGizmos()
+    void OnDrawGizmosSelected()
     {
-        Gizmos.color = Color.green;
-        Gizmos.DrawRay(transform.position, Vector3.down * (groundCheckDistance + 0.1f));
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, attackRange);
     }
 }
+

@@ -20,6 +20,17 @@ public class CollectibleItem : MonoBehaviour
         {
             Debug.LogError("CollectibleItem: GameManager not found!");
         }
+        
+        SnapToGround();
+    }
+    
+    private void SnapToGround()
+    {
+        RaycastHit hit;
+        if (Physics.Raycast(transform.position + Vector3.up * 2f, Vector3.down, out hit, 10f))
+        {
+            transform.position = hit.point + Vector3.up * 0.15f;
+        }
     }
     
     void OnTriggerEnter(Collider other)
@@ -39,11 +50,6 @@ public class CollectibleItem : MonoBehaviour
         if (gameManager != null)
         {
             gameManager.OnItemCollected(item);
-            
-            if (itemName == "Coin")
-            {
-                gameManager.OnCoinCollected(gameObject);
-            }
         }
         
         Destroy(gameObject);
