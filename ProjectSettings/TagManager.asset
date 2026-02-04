@@ -5,6 +5,11 @@ TagManager:
   serializedVersion: 2
   tags:
   - Ground
+  - Tree
+  - Chest
+  - Diamond
+  - Wood
+  - Collectible
   layers:
   - Default
   - TransparentFX
@@ -13,10 +18,10 @@ TagManager:
   - Water
   - UI
   - Player
-  - 
-  - 
-  - 
-  - 
+  - Tree
+  - Chest
+  - Diamond
+  - Wood
   - 
   - 
   - 

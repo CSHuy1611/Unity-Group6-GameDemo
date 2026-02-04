@@ -38,6 +38,12 @@ public class TreasureManager : MonoBehaviour
     // CHEST SYSTEM 
     private void SpawnChests()
     {
+        if (chestPrefab == null)
+        {
+            Debug.LogError("❌ TreasureManager: Chest Prefab chưa được gán! Vui lòng kéo vào Inspector.");
+            return;
+        }
+        
         for (int i = 0; i < numberOfChests; i++)
         {
             Vector3 randomPos = GetRandomPositionInRadius(Vector3.zero, chestSpawnRadius);

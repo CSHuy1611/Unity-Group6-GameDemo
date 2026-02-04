@@ -4,17 +4,17 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    [Header("=== MANAGERS ===")]
+    [Header("MANAGERS")]
     public InventoryManager inventoryManager;
     public TreasureManager treasureManager;
 
-    [Header("=== RESOURCE SYSTEM ===")]
+    [Header("RESOURCE SYSTEM")]
     public GameObject treePrefab;
     public List<GameObject> activeTrees = new List<GameObject>();
     [SerializeField] private int maxTrees = 5;
     [SerializeField] private float treeSpawnRadius = 15f;
     
-    [Header("=== COLLECTIBLES ===")]
+    [Header("COLLECTIBLES")]
     public GameObject coinPrefab;
     public List<GameObject> activeCoins = new List<GameObject>();
     [SerializeField] private int fixedCoins = 10;
@@ -23,7 +23,7 @@ public class GameManager : MonoBehaviour
     private GameObject treesParent;
     private GameObject coinsParent;
     
-    [Header("=== SCORE ===")]
+    [Header("SCORE")]
     public int score = 0;
     
     void Start()
@@ -49,16 +49,14 @@ public class GameManager : MonoBehaviour
     {
         if (inventoryManager == null)
         {
-            GameObject invObj = new GameObject("InventoryManager");
-            invObj.transform.SetParent(transform);
-            inventoryManager = invObj.AddComponent<InventoryManager>();
+            Debug.LogError("? GameManager: InventoryManager ch?a ???c gán! Vui lòng kéo vào Inspector.");
+            return;
         }
         
         if (treasureManager == null)
         {
-            GameObject treasureObj = new GameObject("TreasureManager");
-            treasureObj.transform.SetParent(transform);
-            treasureManager = treasureObj.AddComponent<TreasureManager>();
+            Debug.LogError("? GameManager: TreasureManager ch?a ???c gán! Vui lòng kéo vào Inspector.");
+            return;
         }
         
         treesParent = new GameObject("=== TREES ===");
@@ -89,6 +87,12 @@ public class GameManager : MonoBehaviour
     
     private void SpawnTree()
     {
+        if (treePrefab == null)
+        {
+            Debug.LogError("? GameManager: Tree Prefab ch?a ???c gán! Vui lòng kéo vào Inspector.");
+            return;
+        }
+        
         Vector3 randomPos = GetRandomPositionInRadius(Vector3.zero, treeSpawnRadius);
         randomPos.y = 0.5f;
         
@@ -120,6 +124,12 @@ public class GameManager : MonoBehaviour
     // COIN SYSTEM
     private void SpawnCoins()
     {
+        if (coinPrefab == null)
+        {
+            Debug.LogError("? GameManager: Coin Prefab ch?a ???c gán! Vui lòng kéo vào Inspector.");
+            return;
+        }
+        
         for (int i = 0; i < fixedCoins; i++)
         {
             Vector3 randomPos = GetRandomPositionInRadius(Vector3.zero, coinSpawnRadius);
