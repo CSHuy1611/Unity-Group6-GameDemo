@@ -137,7 +137,7 @@ public class PlayerController : MonoBehaviour
     
     private void CheckAttackTargets()
     {
-        Collider[] hitColliders = Physics.OverlapSphere(transform.position, attackRange);
+        Collider2D[] hitColliders = Physics2D.OverlapCircleAll(transform.position, attackRange);
         
         foreach (var hitCollider in hitColliders)
         {
@@ -258,4 +258,5 @@ public class PlayerController : MonoBehaviour
         Gizmos.DrawWireSphere(transform.position, attackRange);
     }
 }
+
 

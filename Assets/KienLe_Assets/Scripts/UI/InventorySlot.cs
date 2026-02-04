@@ -1,12 +1,13 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class InventorySlot : MonoBehaviour
 {
     [Header("UI References")]
     public Image iconImage;
-    public Text quantityText;
-    public Text nameText;
+    public TextMeshProUGUI quantityText;
+    public TextMeshProUGUI nameText;
     
     private Item currentItem;
     

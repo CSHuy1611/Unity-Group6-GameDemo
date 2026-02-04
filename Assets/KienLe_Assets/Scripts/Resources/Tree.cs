@@ -8,13 +8,7 @@ public class Tree : MonoBehaviour
     public GameObject woodPrefab;
     [SerializeField] private int woodDropAmount = 1;
     
-    private GameManager gameManager;
     private bool isChopped = false;
-    
-    public void Initialize(GameManager manager)
-    {
-        gameManager = manager;
-    }
     
     public void ChopDown()
     {
@@ -25,10 +19,7 @@ public class Tree : MonoBehaviour
         
         SpawnWood();
         
-        if (gameManager != null)
-        {
-            gameManager.OnTreeDestroyed(gameObject, transform.position);
-        }
+        Destroy(gameObject, 0.3f);
     }
     
     private void SpawnWood()
@@ -36,7 +27,7 @@ public class Tree : MonoBehaviour
         for (int i = 0; i < woodDropAmount; i++)
         {
             Vector3 dropPos = transform.position + Random.insideUnitSphere * 0.5f;
-            dropPos.y = 0.3f;
+            dropPos.y = transform.position.y;
             
             GameObject wood = Instantiate(woodPrefab, dropPos, Quaternion.identity);
             wood.name = $"Wood_{i + 1}";

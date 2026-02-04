@@ -1,10 +1,10 @@
 using UnityEngine;
 using UnityEngine.UI;
-
+using TMPro;
 public class UIManager : MonoBehaviour
 {
     [Header("UI Elements")]
-    public Text scoreText;
+    public TextMeshProUGUI scoreText;
     
     public void UpdateScore(int score)
     {

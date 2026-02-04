@@ -26,14 +26,14 @@ public class CollectibleItem : MonoBehaviour
     
     private void SnapToGround()
     {
-        RaycastHit hit;
-        if (Physics.Raycast(transform.position + Vector3.up * 2f, Vector3.down, out hit, 10f))
+        RaycastHit2D hit = Physics2D.Raycast(transform.position + Vector3.up * 2f, Vector2.down, 10f);
+        if (hit.collider != null)
         {
-            transform.position = hit.point + Vector3.up * 0.15f;
+            transform.position = hit.point + Vector2.up * 0.15f;
         }
     }
     
-    void OnTriggerEnter(Collider other)
+    void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Player") && !isCollected)
         {

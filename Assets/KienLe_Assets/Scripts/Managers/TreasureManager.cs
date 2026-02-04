@@ -26,7 +26,7 @@ public class TreasureManager : MonoBehaviour
     {
         inventoryManager = invManager;
         CreateParentObjects();
-        SpawnChests();
+        Debug.Log("✅ TreasureManager initialized (no auto-spawn chests)");
     }
     
     private void CreateParentObjects()

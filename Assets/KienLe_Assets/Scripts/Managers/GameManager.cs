@@ -7,21 +7,6 @@ public class GameManager : MonoBehaviour
     [Header("MANAGERS")]
     public InventoryManager inventoryManager;
     public TreasureManager treasureManager;
-
-    [Header("RESOURCE SYSTEM")]
-    public GameObject treePrefab;
-    public List<GameObject> activeTrees = new List<GameObject>();
-    [SerializeField] private int maxTrees = 5;
-    [SerializeField] private float treeSpawnRadius = 15f;
-    
-    [Header("COLLECTIBLES")]
-    public GameObject coinPrefab;
-    public List<GameObject> activeCoins = new List<GameObject>();
-    [SerializeField] private int fixedCoins = 10;
-    [SerializeField] private float coinSpawnRadius = 20f;
-    
-    private GameObject treesParent;
-    private GameObject coinsParent;
     
     [Header("SCORE")]
     public int score = 0;
@@ -43,8 +28,6 @@ public class GameManager : MonoBehaviour
     {
         SetupManagers();
         InitializeManagers();
-        SpawnTrees();
-        SpawnCoins();
         UpdateScoreUI();
         LogAllLists();
     }
@@ -62,9 +45,6 @@ public class GameManager : MonoBehaviour
             Debug.LogError("? GameManager: TreasureManager ch?a ???c gán! Vui lòng kéo vào Inspector.");
             return;
         }
-        
-        treesParent = new GameObject("=== TREES ===");
-        coinsParent = new GameObject("=== COINS ===");
     }
     
     private void InitializeManagers()
@@ -78,86 +58,6 @@ public class GameManager : MonoBehaviour
         Debug.Log("? InventoryManager initialized");
     }
     
-    // TREE SYSTEM
-    private void SpawnTrees()
-    {
-        for (int i = 0; i < maxTrees; i++)
-        {
-            SpawnTree();
-        }
-        
-        Debug.Log($"? Spawned {activeTrees.Count} trees");
-    }
-    
-    private void SpawnTree()
-    {
-        if (treePrefab == null)
-        {
-            Debug.LogError("? GameManager: Tree Prefab ch?a ???c gán! Vui lòng kéo vào Inspector.");
-            return;
-        }
-        
-        Vector3 randomPos = GetRandomPositionInRadius(Vector3.zero, treeSpawnRadius);
-        randomPos.y = 0.5f;
-        
-        GameObject tree = Instantiate(treePrefab, randomPos, Quaternion.identity, treesParent.transform);
-        tree.name = $"Tree_{activeTrees.Count + 1}";
-        
-        activeTrees.Add(tree);
-        
-        Tree treeScript = tree.GetComponent<Tree>();
-        if (treeScript != null)
-        {
-            treeScript.Initialize(this);
-        }
-    }
-    
-    public void OnTreeDestroyed(GameObject tree, Vector3 position)
-    {
-        if (activeTrees.Contains(tree))
-        {
-            activeTrees.Remove(tree);
-            Debug.Log($"?? Tree chopped! Remaining trees: {activeTrees.Count}");
-            
-            Destroy(tree, 0.3f);
-            
-            SpawnTree();
-        }
-    }
-    
-    // COIN SYSTEM
-    private void SpawnCoins()
-    {
-        if (coinPrefab == null)
-        {
-            Debug.LogError("? GameManager: Coin Prefab ch?a ???c gán! Vui lòng kéo vào Inspector.");
-            return;
-        }
-        
-        for (int i = 0; i < fixedCoins; i++)
-        {
-            Vector3 randomPos = GetRandomPositionInRadius(Vector3.zero, coinSpawnRadius);
-            randomPos.y = 0.3f;
-            
-            GameObject coin = Instantiate(coinPrefab, randomPos, Quaternion.identity, coinsParent.transform);
-            coin.name = $"Coin_{i + 1}";
-            
-            activeCoins.Add(coin);
-        }
-        
-        Debug.Log($"? Spawned {activeCoins.Count} coins");
-    }
-    
-    public void OnCoinCollected(GameObject coin)
-    {
-        if (activeCoins.Contains(coin))
-        {
-            activeCoins.Remove(coin);
-            Debug.Log($"?? Coin collected! Remaining coins: {activeCoins.Count}");
-        }
-    }
-    
-    // ITEM COLLECTION & SCORE
     public void OnItemCollected(Item item)
     {
         if (inventoryManager != null)
@@ -252,8 +152,6 @@ public class GameManager : MonoBehaviour
             Debug.Log($"?? Active Treasures: {treasureManager.GetTreasureCount()}");
         }
         
-        Debug.Log($"?? Active Trees: {activeTrees.Count}");
-        Debug.Log($"?? Active Coins: {activeCoins.Count}");
         Debug.Log($"?? Score: {score}");
         
         Debug.Log("???????????????????????????????????????????\n");

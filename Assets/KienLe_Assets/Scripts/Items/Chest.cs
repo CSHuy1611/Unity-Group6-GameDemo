@@ -54,12 +54,12 @@ public class Chest : MonoBehaviour
             GameObject treasure = Instantiate(prefabToSpawn, spawnPos, Quaternion.identity);
             treasure.name = $"{(isDiamond ? "Diamond" : "Coin")}_{i + 1}";
             
-            Rigidbody rb = treasure.GetComponent<Rigidbody>();
+            Rigidbody2D rb = treasure.GetComponent<Rigidbody2D>();
             if (rb == null)
             {
-                rb = treasure.AddComponent<Rigidbody>();
+                rb = treasure.AddComponent<Rigidbody2D>();
             }
-            rb.useGravity = true;
+            rb.gravityScale = 1f;
             rb.mass = 0.5f;
             rb.drag = 0.5f;
             
