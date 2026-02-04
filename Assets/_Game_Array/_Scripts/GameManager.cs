@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -14,6 +15,13 @@ public class GameManager : MonoBehaviour
 
     [Header("Giao diện chiến thắng")]
     public GameObject winUI;
+
+    [Header("UI Text")]
+    public TextMeshProUGUI coinText;
+    public TextMeshProUGUI killText;
+
+    [Header("UI Nhiệm Vụ")]
+    public GameObject missionPanel;
 
     [Header("Theo dõi tiến độ")]
     public int currentLevel = 0; 
@@ -40,6 +48,7 @@ public class GameManager : MonoBehaviour
         coinsCollected++;
         Debug.Log("Đã nhặt xu: " + coinsCollected + "/" + tasks[currentLevel][0]);
         CheckMission();
+        UpdateUI();
     }
 
     public void AddKill()
@@ -47,6 +56,13 @@ public class GameManager : MonoBehaviour
         enemiesKilled++;
         Debug.Log("Đã giết quái: " + enemiesKilled + "/" + tasks[currentLevel][1]);
         CheckMission();
+        UpdateUI();
+    }
+
+    public void ResetPoint()
+    {
+        coinsCollected = 0;
+        enemiesKilled = 0;
     }
 
     void CheckMission()
@@ -83,6 +99,33 @@ public class GameManager : MonoBehaviour
             Debug.Log("CHÚC MỪNG CHIẾN THẮNG!");
             if (winUI != null) winUI.SetActive(true);
             Time.timeScale = 0;
+        }
+    }
+
+    public void UpdateUI()
+    {
+        if (coinText != null)
+            coinText.text = "Coin: " + coinsCollected;
+
+        if (killText != null)
+            killText.text = "Kill: " + enemiesKilled;
+    }
+
+    public void ToggleMission()
+    {
+        if (missionPanel != null)
+        {
+            bool isActive = missionPanel.activeSelf;
+            missionPanel.SetActive(!isActive);
+
+            if (missionPanel.activeSelf == true)
+            {
+                Time.timeScale = 0f; 
+            }
+            else
+            {
+                Time.timeScale = 1f; 
+            }
         }
     }
 

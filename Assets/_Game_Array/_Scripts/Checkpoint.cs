@@ -8,8 +8,10 @@ public class Checkpoint : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
+            GameManager.Instance.ResetPoint();
+            GameManager.Instance.UpdateUI();
             GameManager.Instance.NextLevel(); 
-            gameObject.SetActive(false);      
+            gameObject.SetActive(false);   
         }
     }
 }
